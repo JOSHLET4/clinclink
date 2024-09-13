@@ -8,16 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Schedule extends Model
+class DoctorDetail extends Model
 {
     use HasFactory, SoftDeletes;
     protected $guarded = [];
-    public function userAsDoctor(): BelongsTo
+    public function user(): BelongsTo 
     {
-        return $this->belongsTo(User::class, 'doctor_id');
+        return $this->belongsTo(DoctorDetail::class, 'doctor_id');
     }
-    public function workDays(): HasMany
+    public function doctorDetailSpecializations(): HasMany
     {
-        return $this->hasMany(WorkDay::class);
+        return $this->hasMany(DoctorDetailSpecialization::class);
     }
 }

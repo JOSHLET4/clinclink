@@ -5,19 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Schedule extends Model
+class ResourceRoom extends Model
 {
     use HasFactory, SoftDeletes;
     protected $guarded = [];
-    public function userAsDoctor(): BelongsTo
+    public function resource(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'doctor_id');
+        return $this->belongsTo(Resource::class);
     }
-    public function workDays(): HasMany
+    public function room(): BelongsTo
     {
-        return $this->hasMany(WorkDay::class);
+        return $this->belongsTo(Room::class);
     }
 }
