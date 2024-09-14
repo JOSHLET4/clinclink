@@ -30,13 +30,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
+//Route::post('register', [AuthController::class, 'register']);
+//Route::post('login', [AuthController::class, 'login']);
 
 Route::group(['middleware' => ['auth:sanctum']], function() {
     // rutas
     Route::get('user-profile', [AuthController::class, 'userProfile']);
-    Route::get('logout', [AuthController::class, 'logout']);
+    //Route::get('logout', [AuthController::class, 'logout']);
 
     Route::post('reactive-record/{user}', [SoftDeletedController::class, 'reactivateSoftDeleted']);
     Route::post('all-soft-deleted-records', [SoftDeletedController::class, 'allSoftDeletedRecords']);
