@@ -37,7 +37,10 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     // rutas
     Route::get('user-profile', [AuthController::class, 'userProfile']);
     Route::get('logout', [AuthController::class, 'logout']);
-    Route::post('reactive-record', [SoftDeletedController::class, 'reactivateSoftDeleted']);
+
+    Route::post('reactive-record/{user}', [SoftDeletedController::class, 'reactivateSoftDeleted']);
+    Route::post('all-soft-deleted-records', [SoftDeletedController::class, 'allSoftDeletedRecords']);
+    Route::post('check-unique-attribute-in-records', [SoftDeletedController::class, 'checkUniqueAttributeInRecords']);
     
     Route::resource('user', UserController::class);
     Route::resource('module', ModuleController::class);

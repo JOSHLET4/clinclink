@@ -24,7 +24,9 @@ class SimpleCRUD
             // validar si hay paginacion
             $validatePagination = $paginationNumber && $paginationNumber > 0;
             // consultar registros
-            $data = $validatePagination ? $this->model::paginate($paginationNumber) : $this->model::all();
+            $data = $validatePagination
+                ? $this->model::paginate($paginationNumber)
+                : $this->model::all();
             // aplicar recurso
             if ($validatePagination && $resourceClass !== null)
                 $data = new PaginatedResourceCollection($resourceClass, $data);
