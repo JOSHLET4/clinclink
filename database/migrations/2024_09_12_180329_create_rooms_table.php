@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('room_state_id');
-            $table->string('name');
+            $table->string('name')->unique();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('room_state_id')->references('id')->on('room_states');

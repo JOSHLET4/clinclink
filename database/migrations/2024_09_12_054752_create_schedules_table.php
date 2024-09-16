@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('doctor_id');
-            $table->time('available_time_start');
-            $table->time('available_time_end');
+            $table->integer('day_of_week');
+            $table->time('time_start');
+            $table->time('time_end');
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('doctor_id')->references('id')->on('users');

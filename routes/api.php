@@ -51,8 +51,6 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('doctor-detail-specialization', DoctorDetailSpecializationController::class);
     Route::resource('schedule', ScheduleController::class);
     Route::resource('medical-record', MedicalRecordController::class);
-    Route::resource('work_day', WorkDayController::class);
-    Route::resource('work_hour', WorkHourController::class);
     Route::resource('appointment', AppointmentController::class);
     Route::resource('medical-exam', MedicalExamController::class);
     Route::resource('consultation', ConsultationController::class);

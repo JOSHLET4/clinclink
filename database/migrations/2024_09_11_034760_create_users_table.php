@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('phone_number');
             $table->date('date_of_birth');
             $table->string('profile_picture_uri')->nullable();
-            $table->boolean('state')->nullable()->default(true);
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

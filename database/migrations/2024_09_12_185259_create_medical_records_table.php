@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id');
+            $table->unsignedBigInteger('patient_id')->unique();
             $table->unsignedBigInteger('primary_doctor_id');
             $table->timestamps();
             $table->softDeletes();
