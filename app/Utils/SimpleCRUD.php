@@ -97,7 +97,7 @@ class SimpleCRUD
             );
         } catch (\Exception $e) {
             return SimpleJSONResponse::errorResponse(
-                'Error al actualizar registro en la tabla ' . $this->model->getTable() . ': ' . $e->getMessage(),
+                'Error al actualizar registro en la tabla ' .$this->model->getTable() . ': ' . $e->getMessage(),
                 400
             );
         }

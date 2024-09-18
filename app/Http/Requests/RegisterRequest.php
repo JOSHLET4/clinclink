@@ -36,7 +36,7 @@ class RegisterRequest extends FormRequest
                 new UniqueOrSoftDeletedRule,
             ],
             'password' => 'required|min:5|confirmed',
-            'phone_number' => 'required|min:8',
+            'phone_number' => 'required|min:8||integer',
             'date_of_birth' => 'required|date',
             'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];

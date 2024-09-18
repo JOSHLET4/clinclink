@@ -27,6 +27,5 @@ class UniqueOrSoftDeletedRule implements ValidationRule
         }
 
         // Si el usuario ya existe y no está eliminado
-        if ($user) $fail('El ' . $attribute . ' ya esta en uso');
     }
 }

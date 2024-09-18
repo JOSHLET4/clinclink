@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AppointmentRequest;
 use App\Models\Appointment;
 use App\Utils\SimpleCRUD;
 use Illuminate\Http\JsonResponse;
@@ -35,7 +36,7 @@ class AppointmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(AppointmentRequest $request): JsonResponse
     {
         return $this->crud->store($request);
     }
@@ -59,7 +60,7 @@ class AppointmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id): JsonResponse
+    public function update(AppointmentRequest $request, string $id): JsonResponse
     {
         return $this->crud->update($request, $id);
     }

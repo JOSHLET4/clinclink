@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SpecializationRequest;
 use App\Models\Specialization;
 use App\Utils\SimpleCRUD;
 use Illuminate\Http\JsonResponse;
@@ -35,7 +36,7 @@ class SpecializationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(SpecializationRequest $request): JsonResponse
     {
         return $this->crud->store($request);
     }
@@ -59,7 +60,7 @@ class SpecializationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id): JsonResponse
+    public function update(SpecializationRequest $request, string $id): JsonResponse
     {
         return $this->crud->update($request, $id);
     }

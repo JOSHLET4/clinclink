@@ -17,10 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('appointment_status_id');
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('doctor_id');
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->timestamp('start_timestamp');
+            $table->timestamp('end_timestamp');
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('room_id')->references('id')->on('rooms');

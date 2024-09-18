@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DoctorDetailSpecializationRequest;
 use App\Models\DoctorDetailSpecialization;
 use App\Utils\SimpleCRUD;
 use Illuminate\Http\JsonResponse;
@@ -35,7 +36,7 @@ class DoctorDetailSpecializationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(DoctorDetailSpecializationRequest $request): JsonResponse
     {
         return $this->crud->store($request);
     }
@@ -59,7 +60,7 @@ class DoctorDetailSpecializationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id): JsonResponse
+    public function update(DoctorDetailSpecializationRequest $request, string $id): JsonResponse
     {
         return $this->crud->update($request, $id);
     }

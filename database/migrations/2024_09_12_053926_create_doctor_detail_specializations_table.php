@@ -19,6 +19,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->foreign('doctor_detail_id')->references('id')->on('doctor_details');
             $table->foreign('specialization_id')->references('id')->on('specializations');
+            $table->unique(['doctor_detail_id', 'specialization_id'], 'doctor_detail_specialization_combination_unique');
         });
     }
 

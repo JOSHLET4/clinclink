@@ -19,6 +19,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->foreign('resource_id')->references('id')->on('resources');
             $table->foreign('room_id')->references('id')->on('rooms');
+            $table->unique(['resource_id', 'room_id']);
         });
     }
 

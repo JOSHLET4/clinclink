@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('module_id')->references('id')->on('modules');
             $table->foreign('permission_id')->references('id')->on('permissions');
+            $table->unique(['user_id', 'module_id', 'permission_id']);
         });
     }
 
