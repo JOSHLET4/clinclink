@@ -42,7 +42,8 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::post('all-soft-deleted-records', [SoftDeletedController::class, 'allSoftDeletedRecords']);
     Route::post('check-unique-attribute-in-records', [SoftDeletedController::class, 'checkUniqueAttributeInRecords']);
 
-    Route::get('appointment/available-dates-by-specialization', [AppointmentController::class, 'availableDatesBySpecialty']);
+    Route::post('appointment/available-appointments-by-specialization', [AppointmentController::class, 'availableAppointmentsBySpecialization']);
+    Route::post('appointment/appointments-by-specialization', [AppointmentController::class, 'appointmentsBySpecialization']);
 
     Route::resource('user', UserController::class);
     Route::resource('module', ModuleController::class);

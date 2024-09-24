@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AppointmentRequest;
+use App\Http\Requests\AvailableAppointmentsBySpecializationRequest;
 use App\Models\Appointment;
 use App\Models\User;
 use App\Utils\SimpleCRUD;
@@ -77,29 +78,41 @@ class AppointmentController extends Controller
         return $this->crud->destroy($id);
     }
 
-    public function availableDatesBySpecialty()
+    public function appointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request)
     {
+        return SimpleJSONResponse::successResponse(
+            $this->doctorAppointmentsBySpecialization(
+                $request->input('doctor_id'),
+                $request->input('specialization_id'),
+                $request->input('start_times_tamp'),
+                $request->input('end_times_tamp')
+            ),
+            'Registros consultados exitosamente',
+            200
+        );
+    }
 
-        // // Ejemplo de uso
-        // $appointments = [
-        //     ['appointment_start_timestamp' => '2024-05-03 09:00:00', 'appointment_end_timestamp' => '2024-05-03 10:00:00'],
-        //     ['appointment_start_timestamp' => '2024-05-03 10:00:00', 'appointment_end_timestamp' => '2024-05-03 11:00:00'],
-        //     ['appointment_start_timestamp' => '2024-05-04 13:00:00', 'appointment_end_timestamp' => '2024-05-04 14:00:00']
-        // ];
-
-        // $freeSlots = $this->getFreeSlots(1, '2024-05-03 08:00:00', '2024-05-10 16:00:00', '07:00:00', '19:00:00', $appointments);
-
-        // // Formatear y mostrar los resultados
-        // foreach ($freeSlots as $slot) {
-        //     echo "Libre desde: " . $slot[0]->format('Y-m-d H:i:s') . " hasta " . $slot[1]->format('Y-m-d H:i:s') . "\n";
-        // }
-
-
+    public function availableAppointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request)
+    {
+        // valores de entrada
+        $inputDoctorId = $request->input('doctor_id');
+        $especializationId = $request->input('specialization_id');
+        $inputStartTimestamp = $request->input('start_times_tamp');
+        $inputEndTimestamp = $request->input('end_times_tamp');
 
         // obtengo las citas por especializdad y horas de trabajo del medico
-        $appointments = $this->doctorAppointmentsBySpecialization();
+        $appointments = $this->doctorAppointmentsBySpecialization(
+            $inputDoctorId,
+            $especializationId,
+            $inputStartTimestamp,
+            $inputEndTimestamp,
+        );
+
         // ids de los doctores registrados
         $doctorsId = $appointments->pluck('doctor_id')->unique();
+
+        // horas disponibles para todos los medicos
+        $availableHours = [];
 
         foreach ($doctorsId as $id) {
             $doctorAppointments = $appointments->where('doctor_id', $id);
@@ -107,25 +120,36 @@ class AppointmentController extends Controller
             $doctorTimeEnd = $doctorAppointments->pluck('doctor_time_end')->unique()[0];
 
             // faltan los valores de entrada fechas
-            $freeSlots = $this->getFreeSlots($id, '2024-09-05 08:00:00', '2024-09-07 20:00:00', $doctorTimeStart, $doctorTimeEnd, $doctorAppointments->toArray());
-            // Formatear y mostrar los resultados
-            foreach ($freeSlots as $slot) {
-                echo "Libre desde: " . $slot[0]->format('Y-m-d H:i:s') . " hasta " . $slot[1]->format('Y-m-d H:i:s') . "\n";
-            }
+            $freeSlots = $this->getFreeSlots(
+                $id,
+                $inputStartTimestamp,
+                $inputEndTimestamp,
+                $doctorTimeStart,
+                $doctorTimeEnd,
+                $doctorAppointments->toArray()
+            );
+
+            // formato a los slots de horas disponbiles
+            $formattedDates = array_map(function ($slot) {
+                return [
+                    'from_time' => $slot[0]->format('Y-m-d H:i:s'),
+                    'to_time' => $slot[1]->format('Y-m-d H:i:s')
+                ];
+            }, $freeSlots);
+
+            $availableHours[] = [
+                'doctor_id' => $id,
+                'available_hours' => $formattedDates
+            ];
         }
-
-        // $appointments = [
-        //     ['appointment_start_timestamp' => '2024-05-03 09:00:00', 'appointment_end_timestamp' => '2024-05-03 10:00:00'],
-        //     ['appointment_start_timestamp' => '2024-05-03 10:00:00', 'appointment_end_timestamp' => '2024-05-03 11:00:00'],
-        //     ['appointment_start_timestamp' => '2024-05-04 13:00:00', 'appointment_end_timestamp' => '2024-05-04 14:00:00']
-        // ];
-
-
-
-        // return SimpleJSONResponse::successResponse($freeSlots, 'consulta correcta', 200);
+        return SimpleJSONResponse::successResponse(
+            $availableHours,
+            'Registros consultados exitosamente',
+            200
+        );
     }
 
-    public function doctorAppointmentsBySpecialization()
+    public function doctorAppointmentsBySpecialization($doctorId = null, $specialization_id, $startTimestamp, $endTimestamp)
     {
         /*
             citas del medico x por especializacion x que se encuentran entre la 
@@ -147,11 +171,16 @@ class AppointmentController extends Controller
             ->join('doctor_details', 'doctor_details.doctor_id', '=', 'users.id')
             ->join('doctor_detail_specializations', 'doctor_detail_specializations.doctor_detail_id', '=', 'doctor_details.id')
             ->join('specializations', 'doctor_detail_specializations.specialization_id', '=', 'specializations.id')
-            ->where('specializations.name', 'dermatologia')
-            ->where('schedules.time_start', '>=', '08:00:00')
-            ->where('schedules.time_end', '<=', '20:00:00')
-            ->where('appointments.start_timestamp', '<', '2024-09-07 20:00:00')
-            ->where('appointments.end_timestamp', '>', '2024-09-05 08:00:00')
+            ->where('specializations.id', $specialization_id)
+            ->where('appointments.start_timestamp', '<', $endTimestamp) // 2024-09-09 20:00:00
+            ->where('appointments.end_timestamp', '>', $startTimestamp) // 2024-09-05 08:00:00
+            // cuenta con citas a partir de la hora de inicio puntual 8:00:00
+            ->where('schedules.time_start', '<=', DB::raw('TIME(appointments.start_timestamp)'))
+            // No lee registros que empiezan a al hora de finalizacion (16:00:00 x mal) 
+            ->where('schedules.time_end', '>', DB::raw('TIME(appointments.start_timestamp)'))
+            ->when($doctorId, function ($query) use ($doctorId) {
+                return $query->where('users.id', $doctorId);
+            })
             ->groupBy(
                 'users.id',
                 'appointments.id',
@@ -188,7 +217,8 @@ class AppointmentController extends Controller
 
             // Obtener las citas del doctor para este día
             $dayAppointments = array_filter($appointments, function ($appointment) use ($currentDate) {
-                return (new DateTime($appointment['appointment_start_timestamp']))->format('Y-m-d') === $currentDate->format('Y-m-d');
+                return (
+                    new DateTime($appointment['appointment_start_timestamp']))->format('Y-m-d') === $currentDate->format('Y-m-d');
             });
 
             // Si no hay citas, el día completo está libre
@@ -213,14 +243,9 @@ class AppointmentController extends Controller
                     if ($lastEnd < $appointmentStart) {
                         $freeSlots[] = [$lastEnd, $appointmentStart];
                     }
-                    
+
                     // Actualizar el final de la última cita fecha 11:00:00
                     $lastEnd = $appointmentEnd;
-                    
-                    
-                    // if ($lastEnd->format('H-i-s') > $workEnd) {
-                    //     $lastEnd = new DateTime($lastEnd->format('Y-m-d') . " " . $workEnd);
-                    // } 
                 }
 
                 // Si hay espacio después de la última cita
