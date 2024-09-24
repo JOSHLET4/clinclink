@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AppointmentRequest;
 use App\Http\Requests\AvailableAppointmentsBySpecializationRequest;
 use App\Models\Appointment;
+use App\Models\Schedule;
 use App\Models\User;
 use App\Utils\SimpleCRUD;
 use App\Utils\SimpleJSONResponse;
@@ -78,7 +79,7 @@ class AppointmentController extends Controller
         return $this->crud->destroy($id);
     }
 
-    public function appointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request)
+    public function appointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request): JsonResponse
     {
         return SimpleJSONResponse::successResponse(
             $this->doctorAppointmentsBySpecialization(
@@ -92,7 +93,7 @@ class AppointmentController extends Controller
         );
     }
 
-    public function availableAppointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request)
+    public function availableAppointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request): JsonResponse
     {
         // valores de entrada
         $inputDoctorId = $request->input('doctor_id');
@@ -116,16 +117,12 @@ class AppointmentController extends Controller
 
         foreach ($doctorsId as $id) {
             $doctorAppointments = $appointments->where('doctor_id', $id);
-            $doctorTimeStart = $doctorAppointments->pluck('doctor_time_start')->unique()[0];
-            $doctorTimeEnd = $doctorAppointments->pluck('doctor_time_end')->unique()[0];
 
             // faltan los valores de entrada fechas
             $freeSlots = $this->getFreeSlots(
                 $id,
                 $inputStartTimestamp,
                 $inputEndTimestamp,
-                $doctorTimeStart,
-                $doctorTimeEnd,
                 $doctorAppointments->toArray()
             );
 
@@ -192,7 +189,10 @@ class AppointmentController extends Controller
             ->get();
     }
 
-    function getFreeSlots($doctorId, $startDate, $endDate, $workStart, $workEnd, $appointments)
+    // solo toma el primer horario de el medico, pero deberia de cambiar. 
+
+    // function getFreeSlots($doctorId, $startDate, $endDate, $workStart, $workEnd, $appointments): array
+    function getFreeSlots($doctorId, $startDate, $endDate, $appointments): array
     {
         /*
             - ya no es importante guardar hora inicio y hora final de las fechas ingresadas
@@ -210,10 +210,23 @@ class AppointmentController extends Controller
         while ($currentDate <= $endDate) {
             // Rango de trabajo del día actual
 
+            // obtener el numero del dia de la fecha actual
+            $currentDayOfWeek = $currentDate->format('N');
+            // botener horario del doctor segun el dia especifico
+            $doctorScheduleDay =  Schedule::select('time_start', 'time_end')
+                        ->where('day_of_week', $currentDayOfWeek)
+                        ->where('doctor_id', $doctorId)->first(); 
+
+            // si no encuentra horario ese dia, se salta el dia
+            if (!$doctorScheduleDay || !$doctorScheduleDay->time_start || !$doctorScheduleDay->time_end) {
+                $currentDate->modify('+1 day');
+                continue;
+            }
+           
             // fecha actual " " hora inicio medico
-            $dayStart = new DateTime($currentDate->format('Y-m-d') . " " . $workStart);
+            $dayStart = new DateTime($currentDate->format('Y-m-d') . " " . $doctorScheduleDay->time_start);
             // fecha actual " " hora fin meidoc
-            $dayEnd = new DateTime($currentDate->format('Y-m-d') . " " . $workEnd);
+            $dayEnd = new DateTime($currentDate->format('Y-m-d') . " " . $doctorScheduleDay->time_end);
 
             // Obtener las citas del doctor para este día
             $dayAppointments = array_filter($appointments, function ($appointment) use ($currentDate) {
