@@ -79,6 +79,11 @@ class AppointmentController extends Controller
         return $this->crud->destroy($id);
     }
 
+    public function cancelAppointment($id): JsonResponse
+    {
+
+    }
+
     public function appointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request): JsonResponse
     {
         return SimpleJSONResponse::successResponse(
@@ -118,7 +123,6 @@ class AppointmentController extends Controller
         foreach ($doctorsId as $id) {
             $doctorAppointments = $appointments->where('doctor_id', $id);
 
-            // faltan los valores de entrada fechas
             $freeSlots = $this->getFreeSlots(
                 $id,
                 $inputStartTimestamp,
@@ -148,20 +152,19 @@ class AppointmentController extends Controller
 
     public function doctorAppointmentsBySpecialization($doctorId = null, $specialization_id, $startTimestamp, $endTimestamp)
     {
-        /*
+        /* 
             citas del medico x por especializacion x que se encuentran entre la 
             hora de trabajo de inicio y final del medico de las fechas de inicio 
             x y fecha final 'ingresadas'
         */
-
-        // faltan los valores de entrada hora y fecha de ingreso
         return Appointment::select(
             'users.id as doctor_id',
             'appointments.id as appointment_id',
             'schedules.time_start as doctor_time_start',
             'schedules.time_end as doctor_time_end',
             'appointments.start_timestamp as appointment_start_timestamp',
-            'appointments.end_timestamp as appointment_end_timestamp'
+            'appointments.end_timestamp as appointment_end_timestamp',
+            'appointments.appointment_status_id'
         )
             ->join('users', 'appointments.doctor_id', '=', 'users.id')
             ->join('schedules', 'schedules.doctor_id', '=', 'users.id')
@@ -210,6 +213,7 @@ class AppointmentController extends Controller
         while ($currentDate <= $endDate) {
             // Rango de trabajo del día actual
 
+            // ! posible eliminacion (actualizar dias de trabajo segun dia)
             // obtener el numero del dia de la fecha actual
             $currentDayOfWeek = $currentDate->format('N');
             // botener horario del doctor segun el dia especifico
@@ -247,6 +251,13 @@ class AppointmentController extends Controller
                 $lastEnd = $dayStart;
 
                 foreach ($dayAppointments as $appointment) {
+
+                    // ! posible eliminacion (saltar cita si esta cancelada)
+                    // ? 2 representa el estado cancelado (sub consulta para consultar ids para saltar)
+                    if ($appointment['appointment_status_id'] == 2) {
+                        continue;
+                    }
+
                     $appointmentStart = new DateTime($appointment['appointment_start_timestamp']); // fecha y hora inicio de cita
                     $appointmentEnd = new DateTime($appointment['appointment_end_timestamp']); // fecha y hora final de cita
 
