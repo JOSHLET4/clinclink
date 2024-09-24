@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AppointmentRequest;
 use App\Http\Requests\AvailableAppointmentsBySpecializationRequest;
+use App\Http\Requests\RescheduleAppointmentRequest;
+use App\Http\Requests\UpdateAppointmentStatusRequest;
 use App\Models\Appointment;
 use App\Models\Schedule;
 use App\Models\User;
@@ -79,9 +81,34 @@ class AppointmentController extends Controller
         return $this->crud->destroy($id);
     }
 
-    public function cancelAppointment($id): JsonResponse
+    // ! tambien requiere revision de request para esatdo y cuarto de citas para el store y update
+    // ! requiere mejora request para estado y cuarto de citas
+    public function updateAppointmentStatus(UpdateAppointmentStatusRequest $request, $id): JsonResponse
     {
+        $data = Appointment::where('id', $id)->update([
+            'appointment_status_id' => $request->input('appointment_status_id')
+        ]);
+        $data = Appointment::find($id);
+        return SimpleJSONResponse::successResponse(
+            $data,
+            'Registro actualizado exitosamente',
+            200
+        );
+    }
 
+    // ! requiere mejora request para estado y cuarto de citas
+    public function rescheduleAppointment(RescheduleAppointmentRequest $request, $id) 
+    {
+        $data = Appointment::where('id', $id)->update([
+            'start_timestamp' => $request->input('start_timestamp'),
+            'end_timestamp' => $request->input('end_timestamp')
+        ]);
+        $data = Appointment::find($id);
+        return SimpleJSONResponse::successResponse(
+            $data,
+            'Registro actualizado exitosamente',
+            200
+        );
     }
 
     public function appointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request): JsonResponse
@@ -217,16 +244,16 @@ class AppointmentController extends Controller
             // obtener el numero del dia de la fecha actual
             $currentDayOfWeek = $currentDate->format('N');
             // botener horario del doctor segun el dia especifico
-            $doctorScheduleDay =  Schedule::select('time_start', 'time_end')
-                        ->where('day_of_week', $currentDayOfWeek)
-                        ->where('doctor_id', $doctorId)->first(); 
+            $doctorScheduleDay = Schedule::select('time_start', 'time_end')
+                ->where('day_of_week', $currentDayOfWeek)
+                ->where('doctor_id', $doctorId)->first();
 
             // si no encuentra horario ese dia, se salta el dia
             if (!$doctorScheduleDay || !$doctorScheduleDay->time_start || !$doctorScheduleDay->time_end) {
                 $currentDate->modify('+1 day');
                 continue;
             }
-           
+
             // fecha actual " " hora inicio medico
             $dayStart = new DateTime($currentDate->format('Y-m-d') . " " . $doctorScheduleDay->time_start);
             // fecha actual " " hora fin meidoc

@@ -42,8 +42,14 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::post('all-soft-deleted-records', [SoftDeletedController::class, 'allSoftDeletedRecords']);
     Route::post('check-unique-attribute-in-records', [SoftDeletedController::class, 'checkUniqueAttributeInRecords']);
 
+    // obtener tiempos libres de medicos por especialidad entre fechas
     Route::post('appointment/available-appointments-by-specialization', [AppointmentController::class, 'availableAppointmentsBySpecialization']);
+    // obtener citas medicas por especialidad entre fechas
     Route::post('appointment/appointments-by-specialization', [AppointmentController::class, 'appointmentsBySpecialization']);
+    // ! (requiere revision) actualizar estado de cita
+    Route::put('appointment/{appointment}/status', [AppointmentController::class, 'updateAppointmentStatus']);
+    // ! (requiere revision) reprogramar citas
+    Route::put('appointment/{appointment}/reschedule', [AppointmentController::class, 'rescheduleAppointment']);
 
     Route::resource('user', UserController::class);
     Route::resource('module', ModuleController::class);
