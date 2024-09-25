@@ -144,7 +144,7 @@ class AppointmentController extends Controller
         );
     }
 
-    public function filterByDoctorAttributesMethodRoutes(AvailableTimesBySpecializationRequest $request): JsonResponse
+    public function filterAppointmentsByDoctorAttributesRouteMethod(AvailableTimesBySpecializationRequest $request): JsonResponse
     {
         return SimpleJSONResponse::successResponse(
             $this->filterAppointmentsByDoctorAttributes(
@@ -226,7 +226,7 @@ class AppointmentController extends Controller
             'schedules.time_end as doctor_time_end',
             'appointments.start_timestamp as appointment_start_timestamp',
             'appointments.end_timestamp as appointment_end_timestamp',
-            'appointments.appointment_status_id'
+            'appointments.appointment_status_id' 
         )
             ->join('users', 'appointments.doctor_id', '=', 'users.id')
             ->join('schedules', 'schedules.doctor_id', '=', 'users.id')
@@ -254,7 +254,8 @@ class AppointmentController extends Controller
                 'schedules.time_start',
                 'schedules.time_end',
                 'appointments.start_timestamp',
-                'appointments.end_timestamp'
+                'appointments.end_timestamp',
+                'appointments.appointment_status_id'
             )
             ->get();
     }
