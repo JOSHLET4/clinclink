@@ -246,6 +246,7 @@ class AppointmentController extends Controller
             ->when($doctorId, function ($query) use ($doctorId) {
                 return $query->where('users.id', $doctorId);
             })
+            ->where('appointment_status_id', '<>', 2)
             ->groupBy(
                 'users.id',
                 'appointments.id',
@@ -319,13 +320,6 @@ class AppointmentController extends Controller
                 $lastEnd = $dayStart;
 
                 foreach ($dayAppointments as $appointment) {
-
-                    // ! posible eliminacion (saltar cita si esta cancelada)
-                    // ? 2 representa el estado cancelado (sub consulta para consultar ids para saltar)
-                    if ($appointment['appointment_status_id'] == 2) {
-                        continue;
-                    }
-
                     $appointmentStart = new DateTime($appointment['appointment_start_timestamp']); // fecha y hora inicio de cita
                     $appointmentEnd = new DateTime($appointment['appointment_end_timestamp']); // fecha y hora final de cita
 

@@ -45,7 +45,8 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     // obtener tiempos libres de medicos segun fitro de atributos
     Route::post('appointment/available-times-by-doctor-attributes', [AppointmentController::class, 'availableAppointmentsByDoctorAttributes']);
-    // obtener citas me doctor segun filtro de atributos
+
+    // obtener citas de doctor segun filtro de atributos
     Route::post('appointment/filter-appointments-by-doctor-attributes', [AppointmentController::class, 'filterAppointmentsByDoctorAttributesRouteMethod']);
     
     // ! (requiere revision) actualizar estado de cita
@@ -53,10 +54,11 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     // ! (requiere revision) reprogramar citas
     Route::put('appointment/{appointment}/reschedule', [AppointmentController::class, 'rescheduleAppointment']);
     
-    
+    // obtener el conteo las citas programads por rango de tiempos
     Route::post('appointment/count-by-date-range', [AppointmentController::class, 'countAppointmentsByDateRange']);
+    
+    // obtener porcentaje de uso de cuarto especifico por rango de tiempo
     Route::post('appointment/room/{roomId}/usage-percentage-by-date-range', [AppointmentController::class, 'roomUsagePercentageByDateRange']);
-
 
      // ? metodo en RoomController para mayor control y no sobrecargar AppointmentController
     Route::post('appointment/room/{roomId}/available-times-by-room-id', [RoomController::class, 'availableRoomsByRoomId']);

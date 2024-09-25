@@ -14,6 +14,7 @@ class RoomController extends Controller
     {
 
         $appointments = $this->filterAppointmentsRoomId(
+            $request->input('room_id'),
             $request->input('start_timestamp'),
             $request->input('end_timestamp'),
         );
@@ -53,23 +54,27 @@ class RoomController extends Controller
         );
     }
 
-    public function filterAppointmentsRoomId($startTimestamp, $endTimestamp)
+    public function filterAppointmentsRoomId($roomId, $startTimestamp, $endTimestamp)
     {
         return Appointment::select(
-            'appointments.id',
-            'appointments.room_id',
-            'appointments.appointment_status_id',
-            'appointments.start_timestamp as appointment_start_timestamp',
-            'appointments.end_timestamp as appointment_end_timestamp',
+            'id',
+            'room_id',
+            'appointment_status_id',
+            'start_timestamp as appointment_start_timestamp',
+            'end_timestamp as appointment_end_timestamp',
         )
+            ->when($roomId, function ($query) use ($roomId) {
+                return $query->where('room_id', $roomId);
+            })
             ->where('appointments.start_timestamp', '<', $endTimestamp)
             ->where('appointments.end_timestamp', '>', $startTimestamp)
+            ->where('appointment_status_id', '<>', 2)
             ->groupBy(
-                'appointments.id',
-                'appointments.room_id',
-                'appointments.appointment_status_id',
-                'appointments.start_timestamp',
-                'appointments.end_timestamp',
+                'id',
+                'room_id',
+                'appointment_status_id',
+                'start_timestamp',
+                'end_timestamp',
             )
             ->get();
     }

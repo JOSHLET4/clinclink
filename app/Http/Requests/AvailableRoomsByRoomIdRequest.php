@@ -23,6 +23,7 @@ class AvailableRoomsByRoomIdRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'room_id' => 'min:1|integer',
             'start_timestamp' => [
                 'required',
                 'min:1',
