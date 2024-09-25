@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
 use App\Utils\FileHandler;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
@@ -29,13 +30,8 @@ class AuthController extends Controller
             null
         );
     }
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        // validations
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:5|confirmed'
-        ]);
         $user = User::where('email', '=', $request->email)->first();
         if (isset($user->id)) {
             if (Hash::check($request->password, $user->password)) {
@@ -43,7 +39,10 @@ class AuthController extends Controller
                 $token = $user->createToken('auth_token')->plainTextToken;
                 // si todo ok
                 return SimpleJSONResponse::successResponse(
-                    $token,
+                    [
+                        'user_data' => $user,
+                        'tokken' => $token
+                    ],
                     'Usuario logueado exitosamente',
                     200
                 );

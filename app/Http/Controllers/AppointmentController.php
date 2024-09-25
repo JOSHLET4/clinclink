@@ -158,11 +158,6 @@ class AppointmentController extends Controller
         );
     }
 
-    public function availableRoomsByDoctorAttributes(Request $request, $roomId)
-    {
-        return $roomId;
-    }
-
     public function availableAppointmentsByDoctorAttributes(AvailableTimesBySpecializationRequest $request): JsonResponse
     {
         // valores de entrada

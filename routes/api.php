@@ -10,6 +10,7 @@ use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ModuleUserPermissionController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SoftDeletedController;
 use App\Http\Controllers\SpecializationController;
@@ -57,7 +58,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::post('appointment/room/{roomId}/usage-percentage-by-date-range', [AppointmentController::class, 'roomUsagePercentageByDateRange']);
 
 
-    Route::post('appointment/room/{roomId}/available-times-by-doctor-attributes', [AppointmentController::class, 'availableRoomsByDoctorAttributes']);
+    Route::post('appointment/room/{roomId}/available-times-by-room-id', [RoomController::class, 'availableRoomsByRoomId']);
 
     
     // historia medica de paciente especifico, y doctor especifico si es necesario
