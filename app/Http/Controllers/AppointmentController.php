@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AppointmentRequest;
-use App\Http\Requests\AvailableAppointmentsBySpecializationRequest;
+use App\Http\Requests\AvailableTimesBySpecializationRequest;
 use App\Http\Requests\RescheduleAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentStatusRequest;
 use App\Models\Appointment;
@@ -97,7 +97,7 @@ class AppointmentController extends Controller
     }
 
     // ! requiere mejora request para estado y cuarto de citas
-    public function rescheduleAppointment(RescheduleAppointmentRequest $request, $id) 
+    public function rescheduleAppointment(RescheduleAppointmentRequest $request, $id)
     {
         $data = Appointment::where('id', $id)->update([
             'start_timestamp' => $request->input('start_timestamp'),
@@ -111,30 +111,68 @@ class AppointmentController extends Controller
         );
     }
 
-    public function appointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request): JsonResponse
+    public function countAppointmentsByDateRange(AvailableTimesBySpecializationRequest $request)
     {
         return SimpleJSONResponse::successResponse(
-            $this->doctorAppointmentsBySpecialization(
+            $this->filterAppointmentsByDoctorAttributes(
                 $request->input('doctor_id'),
                 $request->input('specialization_id'),
-                $request->input('start_times_tamp'),
-                $request->input('end_times_tamp')
+                $request->input('start_timestamp'),
+                $request->input('end_timestamp')
+            )->count(),
+            'Registros consultados exitosamente',
+            200
+        );
+    }
+
+    public function roomUsagePercentageByDateRange(AvailableTimesBySpecializationRequest $request, $roomId)
+    {
+        $allRoomsUsed = $this->filterAppointmentsByDoctorAttributes(
+            $request->input('doctor_id'),
+            $request->input('specialization_id'),
+            $request->input('start_timestamp'),
+            $request->input('end_timestamp')
+        );
+        $specificRoomsUsed = $allRoomsUsed->where('room_id', $roomId);
+        $usagePercentaje = ($specificRoomsUsed->count() * 100) / $allRoomsUsed->count();
+        return SimpleJSONResponse::successResponse(
+            [
+                'usage_percentaje' => $usagePercentaje
+            ],
+            'Registros consultados exitosamente',
+            200
+        );
+    }
+
+    public function filterByDoctorAttributesMethodRoutes(AvailableTimesBySpecializationRequest $request): JsonResponse
+    {
+        return SimpleJSONResponse::successResponse(
+            $this->filterAppointmentsByDoctorAttributes(
+                $request->input('doctor_id'),
+                $request->input('specialization_id'),
+                $request->input('start_timestamp'),
+                $request->input('end_timestamp')
             ),
             'Registros consultados exitosamente',
             200
         );
     }
 
-    public function availableAppointmentsBySpecialization(AvailableAppointmentsBySpecializationRequest $request): JsonResponse
+    public function availableRoomsByDoctorAttributes(Request $request, $roomId)
+    {
+        return $roomId;
+    }
+
+    public function availableAppointmentsByDoctorAttributes(AvailableTimesBySpecializationRequest $request): JsonResponse
     {
         // valores de entrada
         $inputDoctorId = $request->input('doctor_id');
         $especializationId = $request->input('specialization_id');
-        $inputStartTimestamp = $request->input('start_times_tamp');
-        $inputEndTimestamp = $request->input('end_times_tamp');
+        $inputStartTimestamp = $request->input('start_timestamp');
+        $inputEndTimestamp = $request->input('end_timestamp');
 
         // obtengo las citas por especializdad y horas de trabajo del medico
-        $appointments = $this->doctorAppointmentsBySpecialization(
+        $appointments = $this->filterAppointmentsByDoctorAttributes(
             $inputDoctorId,
             $especializationId,
             $inputStartTimestamp,
@@ -177,7 +215,7 @@ class AppointmentController extends Controller
         );
     }
 
-    public function doctorAppointmentsBySpecialization($doctorId = null, $specialization_id, $startTimestamp, $endTimestamp)
+    public function filterAppointmentsByDoctorAttributes($doctorId = null, $specialization_id = null, $startTimestamp, $endTimestamp)
     {
         /* 
             citas del medico x por especializacion x que se encuentran entre la 
@@ -187,6 +225,8 @@ class AppointmentController extends Controller
         return Appointment::select(
             'users.id as doctor_id',
             'appointments.id as appointment_id',
+            'appointments.room_id as room_id',
+            'specializations.id as specialization_id',
             'schedules.time_start as doctor_time_start',
             'schedules.time_end as doctor_time_end',
             'appointments.start_timestamp as appointment_start_timestamp',
@@ -198,7 +238,10 @@ class AppointmentController extends Controller
             ->join('doctor_details', 'doctor_details.doctor_id', '=', 'users.id')
             ->join('doctor_detail_specializations', 'doctor_detail_specializations.doctor_detail_id', '=', 'doctor_details.id')
             ->join('specializations', 'doctor_detail_specializations.specialization_id', '=', 'specializations.id')
-            ->where('specializations.id', $specialization_id)
+            // ->where('specializations.id', $specialization_id)
+            ->when($specialization_id, function ($query) use ($specialization_id) {
+                return $query->where('specializations.id', $specialization_id);
+            })
             ->where('appointments.start_timestamp', '<', $endTimestamp) // 2024-09-09 20:00:00
             ->where('appointments.end_timestamp', '>', $startTimestamp) // 2024-09-05 08:00:00
             // cuenta con citas a partir de la hora de inicio puntual 8:00:00
@@ -211,6 +254,8 @@ class AppointmentController extends Controller
             ->groupBy(
                 'users.id',
                 'appointments.id',
+                'appointments.room_id',
+                'specializations.id',
                 'schedules.time_start',
                 'schedules.time_end',
                 'appointments.start_timestamp',

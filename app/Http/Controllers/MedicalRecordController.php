@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\MedicalRecordRequest;
+use App\Http\Requests\PatientHistoryRequest;
+use App\Models\Consultation;
 use App\Models\MedicalRecord;
 use App\Utils\SimpleCRUD;
+use App\Utils\SimpleJSONResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -71,5 +74,35 @@ class MedicalRecordController extends Controller
     public function destroy(string $id): JsonResponse
     {
         return $this->crud->destroy($id);
+    }
+
+    public function patientHistory(PatientHistoryRequest $request, $patientId)
+    {
+        $doctorId = $request->input('doctor_id');
+        $data = Consultation::select([
+            'medical_records.id as medical_record_id',
+            'consultations.id as consultation_id',
+            'doctors.id as doctor_id',
+            'patients.id as patient_id',
+            'patients.first_name as patient_name',
+            'doctors.first_name as doctor_name',
+            'consultations.diagnosis',
+            'consultations.treatment',
+            'consultations.notes'
+        ])
+        ->join('users as doctors', 'consultations.doctor_id', '=', 'doctors.id')
+        ->join('medical_records', 'consultations.medical_record_id', '=', 'medical_records.id')
+        ->join('users as patients', 'medical_records.patient_id', '=', 'patients.id')
+        ->where('medical_records.patient_id', $patientId)
+        ->when($doctorId, function ($query) use ($doctorId) {
+                return $query->where('doctors.id', $doctorId);
+            })
+        ->get();
+        return SimpleJSONResponse::successResponse(
+            $data,
+            'Registros consultados exitosamente',
+            200
+        );
+
     }
 }
