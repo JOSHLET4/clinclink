@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Appointment;
+use App\Rules\AppointmentRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAppointmentStatusRequest extends FormRequest
@@ -21,8 +23,20 @@ class UpdateAppointmentStatusRequest extends FormRequest
      */
     public function rules(): array
     {
+        $appointment = Appointment::where('id', $this->route('appointment'))->first();
         return [
-            'appointment_status_id' => 'required|min:1|integer'
+            'appointment_status_id' => [
+                'required',
+                'min:1',
+                'integer',
+                new AppointmentRule(
+                    $this->route('appointment'),
+                    $appointment->doctor_id,
+                    $appointment->room_id,
+                    $appointment->start_timestamp,
+                    $appointment->end_timestamp,
+                )
+            ] 
         ];
     }
 }

@@ -15,8 +15,6 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SoftDeletedController;
 use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\WorkDayController;
-use App\Http\Controllers\WorkHourController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,18 +47,19 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     // obtener citas de doctor segun filtro de atributos
     Route::post('appointment/filter-appointments-by-doctor-attributes', [AppointmentController::class, 'filterAppointmentsByDoctorAttributesRouteMethod']);
     
-    // ! (requiere revision) actualizar estado de cita
+    // cambiar estado de una cita
     Route::put('appointment/{appointment}/status', [AppointmentController::class, 'updateAppointmentStatus']);
-    // ! (requiere revision) reprogramar citas
+    // cambiar programacion de tiempos de una cita
     Route::put('appointment/{appointment}/reschedule', [AppointmentController::class, 'rescheduleAppointment']);
     
     // obtener el conteo las citas programads por rango de tiempos
     Route::post('appointment/count-by-date-range', [AppointmentController::class, 'countAppointmentsByDateRange']);
     
-    // obtener porcentaje de uso de cuarto especifico por rango de tiempo
+    // obtener porcentaje de uso de cuarto especifico por rango de tiempo horario de 0:00:00 a 23:59:59 horas
     Route::post('appointment/room/{roomId}/usage-percentage-by-date-range', [AppointmentController::class, 'roomUsagePercentageByDateRange']);
 
-     // ? metodo en RoomController para mayor control y no sobrecargar AppointmentController
+    // obtener disponibilidad de tiempos para un cuarto especifico en un rango de tiempo
+    // ? metodo en RoomController para mayor control y no sobrecargar AppointmentController
     Route::post('appointment/room/{roomId}/available-times-by-room-id', [RoomController::class, 'availableRoomsByRoomId']);
 
     // historia medica de paciente especifico, y doctor especifico si es necesario
@@ -75,8 +74,6 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('doctor-detail-specialization', DoctorDetailSpecializationController::class);
     Route::resource('schedule', ScheduleController::class);
     Route::resource('medical-record', MedicalRecordController::class);
-
-    // ! falta verificar la disponibilidad del medico antes de agregarlo (tanto citas como horario)
     Route::resource('appointment', AppointmentController::class);
     Route::resource('medical-exam', MedicalExamController::class);
     Route::resource('consultation', ConsultationController::class);

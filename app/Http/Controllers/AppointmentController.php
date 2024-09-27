@@ -81,8 +81,6 @@ class AppointmentController extends Controller
         return $this->crud->destroy($id);
     }
 
-    // ! tambien requiere revision de request para esatdo y cuarto de citas para el store y update
-    // ! requiere mejora request para estado y cuarto de citas
     public function updateAppointmentStatus(UpdateAppointmentStatusRequest $request, $id): JsonResponse
     {
         $data = Appointment::where('id', $id)->update([
@@ -96,7 +94,6 @@ class AppointmentController extends Controller
         );
     }
 
-    // ! requiere mejora request para estado y cuarto de citas
     public function rescheduleAppointment(RescheduleAppointmentRequest $request, $id)
     {
         $data = Appointment::where('id', $id)->update([

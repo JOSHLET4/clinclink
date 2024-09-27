@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Appointment;
 use App\Rules\AppointmentRule;
+use App\Rules\StartBeforeEndTimestampRule;
 use DB;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -33,9 +34,15 @@ class AppointmentRequest extends FormRequest
                 'required',
                 'min:1',
                 'date_format:Y-m-d H:i:s',
+                // validar que hora inicial no sea mayor a hora final
+                new StartBeforeEndTimestampRule(
+                    $this->start_timestamp,
+                    $this->end_timestamp
+                ),
                 // validar que la fecha y hora ingresada no esten registradas
                 new AppointmentRule(
                     $this->route('appointment'),
+                    $this->doctor_id,
                     $this->room_id,
                     $this->start_timestamp,
                     $this->end_timestamp,
