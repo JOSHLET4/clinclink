@@ -10,6 +10,7 @@ use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ModuleUserPermissionController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SoftDeletedController;
@@ -66,6 +67,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::post('/medical-records/{patientId}/history', [MedicalRecordController::class, 'patientHistory']);
 
     Route::resource('user', UserController::class);
+    Route::resource('role', RoleController::class);
     Route::resource('module', ModuleController::class);
     Route::resource('permission', PermissionController::class);
     Route::resource('module-user-permission', ModuleUserPermissionController::class);
