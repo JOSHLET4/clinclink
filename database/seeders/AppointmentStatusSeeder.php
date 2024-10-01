@@ -13,10 +13,10 @@ class AppointmentStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        $states = ['en cola', 'cancelado', 'aceptado', 'terminado'];
-        foreach ($states as $state) {
+        $statuses = ['en cola', 'cancelado', 'aceptado', 'terminado'];
+        foreach ($statuses as $status) {
             AppointmentStatus::create([
-                'name' => $state
+                'name' => $status
             ]);
         }
     }
