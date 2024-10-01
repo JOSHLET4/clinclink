@@ -41,7 +41,7 @@ class UpdateUserRequest extends FormRequest
             'password' => 'required|min:5|confirmed',
             'phone_number' => 'required|min:8',
             'date_of_birth' => 'required|date',
-            'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'file' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 }
