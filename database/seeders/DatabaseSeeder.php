@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call([
             RoleSeeder::class,
+            AppointmentStatusSeeder::class
         ]);
         User::factory()->count(25)->create();
     }

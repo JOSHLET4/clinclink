@@ -7,6 +7,7 @@ use App\Http\Requests\AvailableTimesBySpecializationRequest;
 use App\Http\Requests\RescheduleAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentStatusRequest;
 use App\Models\Appointment;
+use App\Models\DoctorDetail;
 use App\Models\Schedule;
 use App\Models\User;
 use App\Utils\SimpleCRUD;
@@ -171,8 +172,13 @@ class AppointmentController extends Controller
             $inputEndTimestamp,
         );
 
-        // ids de los doctores registrados
-        $doctorsId = $appointments->pluck('doctor_id')->unique();
+        /*
+            ids de los doctores registrados (si inputDoctorId no esta vacio
+            envia ese id especifico
+        */
+        $doctorsId = $inputDoctorId
+            ? [$inputDoctorId]
+            : DoctorDetail::distinct()->pluck('doctor_id');
 
         // horas disponibles para todos los medicos
         $availableHours = [];
@@ -223,7 +229,7 @@ class AppointmentController extends Controller
             'schedules.time_end as doctor_time_end',
             'appointments.start_timestamp as appointment_start_timestamp',
             'appointments.end_timestamp as appointment_end_timestamp',
-            'appointments.appointment_status_id' 
+            'appointments.appointment_status_id'
         )
             ->join('users', 'appointments.doctor_id', '=', 'users.id')
             ->join('schedules', 'schedules.doctor_id', '=', 'users.id')

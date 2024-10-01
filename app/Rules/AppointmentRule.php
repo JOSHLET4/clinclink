@@ -62,19 +62,30 @@ class AppointmentRule implements ValidationRule
             }
         }
 
-        // Verifica si ya existe una cita en el mismo rango de fechas/horas
+        $id = $this->id;
+
+        // consulta todos las citas entre el rango de fechas
         $query = DB::table($this->table)
-            ->where('room_id', $this->roomId)
             ->where('appointment_status_id', '<>', 2)
             ->where(function ($query) use ($startTimestamp, $endTimestamp) {
                 $query->where('start_timestamp', '<', $endTimestamp)
                     ->where('end_timestamp', '>', $startTimestamp);
-            });
-        // para actualizacones
-        if ($this->id)
-            $query->where('id', '<>', $this->id);
-        if ($query->exists())
-            $fail('La combinacion de fechas ya esta registrada');
+            })
+            ->when($id, function ($query) use ($id) {
+                return $query->where('id', '<>', $id); // excepcion para actualizacion
+            })
+        ;
 
+        // Verificación de cuarto ocupado
+        $roomQuery = clone $query;
+        if ($roomQuery->where('room_id', $this->roomId)->exists()) {
+            $fail('El cuarto ya está ocupado en ese rango de fechas');
+        }
+
+        // Verificación de médico ocupado
+        $doctorQuery = clone $query;
+        if ($doctorQuery->where('doctor_id', $this->doctorId)->exists()) {
+            $fail('El médico ya está ocupado en ese horario');
+        }
     }
 }
