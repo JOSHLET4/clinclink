@@ -10,7 +10,7 @@ class RoomService
   {
   }
 
-  // * tiempos libres de los cuartos
+  // * tiempos libres de los cuartos en 24 horas
   public function getAvailableRoomsByDateRange(
     $inputRoomId,
     $inputStartTimestamp,

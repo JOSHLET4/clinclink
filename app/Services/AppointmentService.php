@@ -144,7 +144,7 @@ class AppointmentService
     }
   }
 
-  // * tiempos libres del medico
+  // * tiempos libres del medico entre su horario de trabajo
   public function getAvailableTimesByDoctorAttributes(
     $inputDoctorId,
     $specializationId,
@@ -270,6 +270,7 @@ class AppointmentService
 
     $freeSlots = [];
     $currentDate = new DateTime($startDate);
+    $startDate = new DateTime($startDate);
     $endDate = new DateTime($endDate);
 
     while ($currentDate <= $endDate) {
@@ -296,9 +297,23 @@ class AppointmentService
       // fecha actual " " hora inicio medico
       $dayStart = new DateTime($currentDate->format('Y-m-d') . " " .
         $doctorScheduleDay->time_start);
-      // fecha actual " " hora fin meidoc
+      // fecha actual " " hora fin medico
       $dayEnd = new DateTime($currentDate->format('Y-m-d') . " " .
         $doctorScheduleDay->time_end);
+
+      // Ajustar dayStart si es el primer día y $startDate es mayor al horario del doctor
+      if ($currentDate->format('Y-m-d') === $startDate->format('Y-m-d')) {
+        if ($startDate > $dayStart) {
+          $dayStart = $startDate;
+        }
+      }
+
+      // Ajustar dayEnd si es el último día y $endDate es menor al horario del doctor
+      if ($currentDate->format('Y-m-d') === $endDate->format('Y-m-d')) {
+        if ($endDate < $dayEnd) {
+          $dayEnd = $endDate;
+        }
+      }
 
       // Obtener las citas del doctor para este día
       $dayAppointments = array_filter(
