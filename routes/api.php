@@ -20,6 +20,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::resource('specialization', SpecializationController::class);
+// obtener tiempos disponibles entre rangos de 1 hora de doctores y cuartos
+Route::post(
+    'appointment/available-appointments-by-doctor-and-room',
+    [AppointmentController::class, 'availableAppointmentsByDoctorAndRoom']
+);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     // * rutas login
@@ -81,12 +87,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         [RoomController::class, 'availableRoomsByRoomId']
     );
 
-    // obtener tiempos disponibles entre rangos de 1 hora de doctores y cuartos
-    Route::post(
-        'appointment/available-appointments-by-doctor-and-room',
-        [AppointmentController::class, 'availableAppointmentsByDoctorAndRoom']
-    );
-
     // historia medica de paciente especifico, y doctor especifico si es necesario
     Route::post(
         '/medical-records/{patientId}/history',
@@ -99,7 +99,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::resource('permission', PermissionController::class);
     Route::resource('module-user-permission', ModuleUserPermissionController::class);
     Route::resource('doctor-detail', DoctorDetailController::class);
-    Route::resource('specialization', SpecializationController::class);
     Route::resource('doctor-detail-specialization', DoctorDetailSpecializationController::class);
     Route::resource('schedule', ScheduleController::class);
     Route::resource('medical-record', MedicalRecordController::class);

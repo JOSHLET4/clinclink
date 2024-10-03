@@ -164,9 +164,18 @@ class AppointmentService
         ids de los doctores registrados (si inputDoctorId no esta vacio
         envia ese id especifico
     */
+    // ! posible eliminacion
     $doctorsId = $inputDoctorId
       ? [$inputDoctorId]
-      : DoctorDetail::distinct()->pluck('doctor_id');
+      : DoctorDetail::select('doctor_details.doctor_id')
+        ->join('doctor_detail_specializations', 'doctor_details.id', '=', 'doctor_detail_specializations.doctor_detail_id')
+        ->join('specializations', 'doctor_detail_specializations.specialization_id', '=', 'specializations.id')
+        ->when($specializationId, function ($query) use ($specializationId) {
+          return $query->where('specializations.id', $specializationId);
+        })
+        ->distinct()
+        ->pluck('doctor_details.doctor_id')
+        ->toArray();
 
     // horas disponibles para todos los medicos
     $availableHours = [];
