@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::resource('specialization', SpecializationController::class);
+Route::resource('appointment', AppointmentController::class);
+
 // obtener tiempos disponibles entre rangos de 1 hora de doctores y cuartos
 Route::post(
     'appointment/available-appointments-by-doctor-and-room',
@@ -102,7 +104,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::resource('doctor-detail-specialization', DoctorDetailSpecializationController::class);
     Route::resource('schedule', ScheduleController::class);
     Route::resource('medical-record', MedicalRecordController::class);
-    Route::resource('appointment', AppointmentController::class);
+    
     Route::resource('medical-exam', MedicalExamController::class);
     Route::resource('consultation', ConsultationController::class);
 });
